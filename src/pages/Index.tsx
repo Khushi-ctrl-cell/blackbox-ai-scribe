@@ -1,42 +1,113 @@
+import { useState } from 'react';
 import { StatusHeader } from '@/components/StatusHeader';
-import { SensorCard } from '@/components/SensorCard';
-import { EventTimeline } from '@/components/EventTimeline';
-import { CausalChain } from '@/components/CausalChain';
-import { SystemLog } from '@/components/SystemLog';
+import { DashboardView } from '@/components/DashboardView';
+import { IndustrySelector } from '@/components/IndustrySelector';
+import { IncidentList } from '@/components/IncidentList';
+import { IncidentTimeline } from '@/components/IncidentTimeline';
+import { FailurePanel } from '@/components/FailurePanel';
+import { EvidenceExplorer } from '@/components/EvidenceExplorer';
+import { ReportPanel } from '@/components/ReportPanel';
 import { useSensorData } from '@/hooks/useSensorData';
+import { useIncidentStore } from '@/hooks/useIncidentStore';
 
 const Index = () => {
   const { sensors, events, causalChain, isRecording, uptime } = useSensorData();
+  const store = useIncidentStore();
+  const [activeTab, setActiveTab] = useState('dashboard');
+
+  const renderTabContent = () => {
+    switch (activeTab) {
+      case 'dashboard':
+        return <DashboardView sensors={sensors} events={events} causalChain={causalChain} />;
+
+      case 'timeline':
+        return (
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 animate-fade-in" style={{ minHeight: 'calc(100vh - 200px)' }}>
+            <div className="lg:col-span-1 space-y-3">
+              <IndustrySelector selected={store.selectedIndustry} onSelect={store.setSelectedIndustry} />
+              <IncidentList
+                incidents={store.incidents}
+                selectedId={store.selectedIncident?.id || null}
+                onSelect={store.selectIncident}
+              />
+            </div>
+            <div className="lg:col-span-2">
+              <IncidentTimeline incident={store.selectedIncident} />
+            </div>
+          </div>
+        );
+
+      case 'failure':
+        return (
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 animate-fade-in" style={{ minHeight: 'calc(100vh - 200px)' }}>
+            <div className="lg:col-span-1 space-y-3">
+              <IndustrySelector selected={store.selectedIndustry} onSelect={store.setSelectedIndustry} />
+              <IncidentList
+                incidents={store.incidents}
+                selectedId={store.selectedIncident?.id || null}
+                onSelect={store.selectIncident}
+              />
+            </div>
+            <div className="lg:col-span-2">
+              <FailurePanel
+                incident={store.selectedIncident}
+                viewMode={store.viewMode}
+                onViewModeChange={store.setViewMode}
+              />
+            </div>
+          </div>
+        );
+
+      case 'evidence':
+        return (
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 animate-fade-in" style={{ minHeight: 'calc(100vh - 200px)' }}>
+            <div className="lg:col-span-1 space-y-3">
+              <IndustrySelector selected={store.selectedIndustry} onSelect={store.setSelectedIndustry} />
+              <IncidentList
+                incidents={store.incidents}
+                selectedId={store.selectedIncident?.id || null}
+                onSelect={store.selectIncident}
+              />
+            </div>
+            <div className="lg:col-span-2">
+              <EvidenceExplorer incident={store.selectedIncident} />
+            </div>
+          </div>
+        );
+
+      case 'report':
+        return (
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 animate-fade-in" style={{ minHeight: 'calc(100vh - 200px)' }}>
+            <div className="lg:col-span-1 space-y-3">
+              <IndustrySelector selected={store.selectedIndustry} onSelect={store.setSelectedIndustry} />
+              <IncidentList
+                incidents={store.incidents}
+                selectedId={store.selectedIncident?.id || null}
+                onSelect={store.selectIncident}
+              />
+            </div>
+            <div className="lg:col-span-2">
+              <ReportPanel incident={store.selectedIncident} />
+            </div>
+          </div>
+        );
+
+      default:
+        return null;
+    }
+  };
 
   return (
-    <div className="flex min-h-screen flex-col bg-background">
-      <StatusHeader isRecording={isRecording} uptime={uptime} />
-
-      <main className="flex-1 p-4 space-y-4 overflow-hidden">
-        {/* Sensor Grid */}
-        <section>
-          <h2 className="font-sans text-xs font-semibold tracking-[0.2em] text-muted-foreground mb-2 uppercase">
-            Sensor Array
-          </h2>
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
-            {sensors.map(sensor => (
-              <SensorCard key={sensor.id} sensor={sensor} />
-            ))}
-          </div>
-        </section>
-
-        {/* Main Content Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 flex-1" style={{ minHeight: 'calc(100vh - 320px)' }}>
-          <div className="lg:col-span-1">
-            <EventTimeline events={events} />
-          </div>
-          <div className="lg:col-span-1">
-            <CausalChain nodes={causalChain} />
-          </div>
-          <div className="lg:col-span-1">
-            <SystemLog />
-          </div>
-        </div>
+    <div className="flex min-h-screen flex-col bg-background noise-bg">
+      <StatusHeader
+        isRecording={isRecording}
+        uptime={uptime}
+        systemStatus={store.systemStatus}
+        activeTab={activeTab}
+        onTabChange={setActiveTab}
+      />
+      <main className="flex-1 p-4 overflow-hidden relative z-10">
+        {renderTabContent()}
       </main>
     </div>
   );
