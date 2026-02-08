@@ -12,86 +12,60 @@ import { useIncidentStore } from '@/hooks/useIncidentStore';
 
 const Index = () => {
   const { sensors, events, causalChain, isRecording, uptime } = useSensorData();
-  const store = useIncidentStore();
+  const store = useIncidentStore(sensors, events);
   const [activeTab, setActiveTab] = useState('dashboard');
+
+  const sidePanel = (
+    <div className="lg:col-span-1 space-y-3">
+      <IndustrySelector selected={store.selectedIndustry} onSelect={store.setSelectedIndustry} />
+      <IncidentList
+        incidents={store.incidents}
+        selectedId={store.selectedIncident?.id || null}
+        onSelect={store.selectIncident}
+      />
+    </div>
+  );
 
   const renderTabContent = () => {
     switch (activeTab) {
       case 'dashboard':
         return <DashboardView sensors={sensors} events={events} causalChain={causalChain} />;
-
       case 'timeline':
         return (
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 animate-fade-in" style={{ minHeight: 'calc(100vh - 200px)' }}>
-            <div className="lg:col-span-1 space-y-3">
-              <IndustrySelector selected={store.selectedIndustry} onSelect={store.setSelectedIndustry} />
-              <IncidentList
-                incidents={store.incidents}
-                selectedId={store.selectedIncident?.id || null}
-                onSelect={store.selectIncident}
-              />
-            </div>
+            {sidePanel}
             <div className="lg:col-span-2">
               <IncidentTimeline incident={store.selectedIncident} />
             </div>
           </div>
         );
-
       case 'failure':
         return (
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 animate-fade-in" style={{ minHeight: 'calc(100vh - 200px)' }}>
-            <div className="lg:col-span-1 space-y-3">
-              <IndustrySelector selected={store.selectedIndustry} onSelect={store.setSelectedIndustry} />
-              <IncidentList
-                incidents={store.incidents}
-                selectedId={store.selectedIncident?.id || null}
-                onSelect={store.selectIncident}
-              />
-            </div>
+            {sidePanel}
             <div className="lg:col-span-2">
-              <FailurePanel
-                incident={store.selectedIncident}
-                viewMode={store.viewMode}
-                onViewModeChange={store.setViewMode}
-              />
+              <FailurePanel incident={store.selectedIncident} viewMode={store.viewMode} onViewModeChange={store.setViewMode} />
             </div>
           </div>
         );
-
       case 'evidence':
         return (
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 animate-fade-in" style={{ minHeight: 'calc(100vh - 200px)' }}>
-            <div className="lg:col-span-1 space-y-3">
-              <IndustrySelector selected={store.selectedIndustry} onSelect={store.setSelectedIndustry} />
-              <IncidentList
-                incidents={store.incidents}
-                selectedId={store.selectedIncident?.id || null}
-                onSelect={store.selectIncident}
-              />
-            </div>
+            {sidePanel}
             <div className="lg:col-span-2">
               <EvidenceExplorer incident={store.selectedIncident} />
             </div>
           </div>
         );
-
       case 'report':
         return (
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 animate-fade-in" style={{ minHeight: 'calc(100vh - 200px)' }}>
-            <div className="lg:col-span-1 space-y-3">
-              <IndustrySelector selected={store.selectedIndustry} onSelect={store.setSelectedIndustry} />
-              <IncidentList
-                incidents={store.incidents}
-                selectedId={store.selectedIncident?.id || null}
-                onSelect={store.selectIncident}
-              />
-            </div>
+            {sidePanel}
             <div className="lg:col-span-2">
               <ReportPanel incident={store.selectedIncident} />
             </div>
           </div>
         );
-
       default:
         return null;
     }
