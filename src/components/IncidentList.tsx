@@ -42,7 +42,7 @@ export function IncidentList({ incidents, selectedId, onSelect }: Props) {
               isSelected
                 ? `${color} bg-card border-l-2`
                 : 'border-border bg-card/50 hover:bg-card hover:border-muted-foreground/20'
-            }`}
+            } ${inc.id === 'inc-live' ? 'ring-1 ring-primary/20' : ''}`}
           >
             <div className="flex items-start justify-between gap-2">
               <div className="flex items-start gap-2 flex-1 min-w-0">
