@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { StatusHeader } from '@/components/StatusHeader';
 import { DashboardView } from '@/components/DashboardView';
 import { IndustrySelector } from '@/components/IndustrySelector';
@@ -7,11 +7,13 @@ import { IncidentTimeline } from '@/components/IncidentTimeline';
 import { FailurePanel } from '@/components/FailurePanel';
 import { EvidenceExplorer } from '@/components/EvidenceExplorer';
 import { ReportPanel } from '@/components/ReportPanel';
+import { SimulateButton } from '@/components/SimulateButton';
+import { SiteNav } from '@/components/SiteNav';
 import { useSensorData } from '@/hooks/useSensorData';
 import { useIncidentStore } from '@/hooks/useIncidentStore';
 
 const Index = () => {
-  const { sensors, events, causalChain, isRecording, uptime } = useSensorData();
+  const { sensors, events, causalChain, isRecording, uptime, triggerFailure } = useSensorData();
   const store = useIncidentStore(sensors, events);
   const [activeTab, setActiveTab] = useState('dashboard');
 
@@ -73,6 +75,7 @@ const Index = () => {
 
   return (
     <div className="flex min-h-screen flex-col bg-background noise-bg">
+      <SiteNav />
       <StatusHeader
         isRecording={isRecording}
         uptime={uptime}
@@ -81,6 +84,9 @@ const Index = () => {
         onTabChange={setActiveTab}
       />
       <main className="flex-1 p-4 overflow-hidden relative z-10">
+        <div className="flex items-center justify-between mb-4">
+          <SimulateButton onSimulate={triggerFailure} />
+        </div>
         {renderTabContent()}
       </main>
     </div>
