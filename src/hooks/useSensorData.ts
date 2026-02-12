@@ -115,5 +115,23 @@ export function useSensorData() {
     return () => clearInterval(interval);
   }, []);
 
-  return { sensors, events, causalChain, isRecording, uptime, setIsRecording };
+  const triggerFailure = useCallback(() => {
+    // Spike all sensors toward critical
+    setSensors(prev =>
+      prev.map(s => {
+        const template = sensorTemplates.find(t => t.id === s.id)!;
+        const spikeValue = template.max * (0.85 + Math.random() * 0.12);
+        const newHistory = [...s.history.slice(1), spikeValue];
+        return { ...s, value: spikeValue, history: newHistory, status: getStatus(spikeValue, template.max) };
+      })
+    );
+    // Add critical events
+    const critEvents: EventLog[] = [
+      { id: `sim-${Date.now()}-1`, timestamp: new Date(), severity: 'critical', source: 'SIM', message: '🚨 SIMULATED CRITICAL FAILURE — All sensors spiking', aiSummary: 'Cascading failure across all subsystems. Multiple sensors exceeding safe limits simultaneously.' },
+      { id: `sim-${Date.now()}-2`, timestamp: new Date(), severity: 'critical', source: 'AI', message: 'Causal chain analysis initiated — root cause identification in progress', aiSummary: 'Correlating multi-sensor data to identify primary failure vector. Confidence building...' },
+    ];
+    setEvents(prev => [...critEvents, ...prev].slice(0, 20));
+  }, []);
+
+  return { sensors, events, causalChain, isRecording, uptime, setIsRecording, triggerFailure };
 }
