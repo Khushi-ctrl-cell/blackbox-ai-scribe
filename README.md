@@ -15,9 +15,6 @@ BlackBox AI is a fully offline, edge-first AI system that continuously monitors 
 ---
 
 ## 🚀 Live Demo
-
-🔗 [blackbox-ai-scribe.lovable.app](https://blackbox-ai-scribe.lovable.app)
-
 ---
 
 ## 🧠 What It Does
